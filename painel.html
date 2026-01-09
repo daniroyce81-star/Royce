@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamer UI Ultra 100% - Autenticado</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap');
+
+        /* ESTILOS ORIGINAIS MANTIDOS */
+        body { background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: 'Ubuntu', sans-serif; user-select: none; overflow: hidden; }
+        @keyframes neon-pulse { 0% { box-shadow: 0 0 15px rgba(255, 0, 127, 0.4); } 50% { box-shadow: 0 0 35px rgba(255, 0, 127, 0.7); } 100% { box-shadow: 0 0 15px rgba(255, 0, 127, 0.4); } }
+        .outer-glow { padding: 3px; border-radius: 35px; background: #ff007f; animation: neon-pulse 4s infinite ease-in-out; }
+        .window { width: 420px; height: 480px; background-color: #080808; border-radius: 32px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #000; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px 10px 25px; }
+        .header-title { display: flex; align-items: center; gap: 15px; color: #ff007f; font-size: 20px; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255, 0, 127, 0.6); }
+        .header-title svg { width: 24px; height: 24px; fill: #ff007f; }
+        .close-x { width: 30px; height: 30px; background: #1a1a1a; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; border: 1px solid #333; cursor: pointer; }
+        .main-content { display: flex; height: 100%; overflow: hidden; }
+        
+        /* ESTILO DA TELA DE LOGIN */
+        #login-screen {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            height: 100%; padding: 30px; text-align: center; gap: 20px;
+        }
+        .key-input {
+            width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ff007f;
+            background: #111; color: #ff007f; font-weight: bold; text-align: center;
+            outline: none; font-family: monospace; letter-spacing: 2px;
+        }
+        .login-btn {
+            background: #ff007f; color: white; border: none; padding: 12px 30px;
+            border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .login-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px #ff007f; }
+        .hidden { display: none !important; }
+
+        /* PAINÉIS E COMPONENTES */
+        .sidebar { width: 80px; display: flex; flex-direction: column; align-items: center; border-right: 1px solid #1a1a1a; padding-top: 5px; z-index: 10; }
+        .nav-btn { width: 45px; height: 45px; margin: 8px 0; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 1px solid #222; color: #fff; cursor: pointer; transition: 0.3s; }
+        .nav-btn.active { background-color: #ff007f; box-shadow: 0 0 20px #ff007f; border: none; }
+        .nav-btn svg { width: 22px; height: 22px; fill: currentColor; }
+        .panels-container { flex: 1; position: relative; overflow: hidden; }
+        .panel { position: absolute; width: 100%; height: 100%; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.4s ease; opacity: 0; pointer-events: none; }
+        .panel.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+        .panel.side-left { transform: translateX(-100%); }
+        .panel.side-right { transform: translateX(100%); }
+        .item-card { background-color: #0c0c0c; border: 1px solid #1a1a1a; border-radius: 18px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .text-label { color: #fff; font-size: 14px; font-weight: 500; }
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; background: #1a1a1a; border-radius: 10px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #ff007f; border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px #ff007f; }
+        .switch { position: relative; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider-ui { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #222; transition: .3s; border-radius: 34px; }
+        .slider-ui:before { position: absolute; content: "✓"; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #ff007f; font-weight: bold; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider-ui { background-color: #ff007f; }
+        input:checked + .slider-ui:before { transform: translateX(24px); }
+        .inject-btn { background: linear-gradient(90deg, #ff007f, #ff00b3); color: white; border: none; border-radius: 15px; padding: 16px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3); }
+        .status-container { background: #050505; border: 1px solid #1a1a1a; border-radius: 18px; padding: 12px 15px; display: flex; align-items: center; gap: 12px; position: relative; overflow: hidden; }
+        .progress-bar { position: absolute; bottom: 0; left: 0; height: 2px; background: #ff007f; width: 0%; transition: width 0.3s; box-shadow: 0 0 10px #ff007f; }
+        .log-console { background: #020202; border: 1px solid #111; border-radius: 20px; flex: 1; padding: 15px; font-family: 'Courier New', monospace; font-size: 11px; color: #00ff00; overflow-y: auto; }
+        .log-line { border-left: 2px solid #ff007f; padding-left: 10px; margin-bottom: 6px; }
+        .time { color: #ff3333; font-weight: bold; margin-right: 5px; }
+        .tag { color: #ffff00; margin-right: 5px; }
+        .dot { width: 10px; height: 10px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 8px #00ff00; }
+        .dot.anim { animation: blink 1.2s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; transform: scale(0.8); } }
+    </style>
+</head>
+<body>
+
+<div class="outer-glow">
+    <div class="window">
+        <div id="login-screen">
+            <div class="header-title">
+                <svg viewBox="0 0 24 24"><path d="M12 2C9.24 2 7 4.24 7 7v3H6c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2h-1V7c0-2.76-2.24-5-5-5zm0 2c1.66 0 3 1.34 3 3v3H9V7c0-1.66 1.34-3 3-3zm0 11c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+                <span>AUTENTICAÇÃO</span>
+            </div>
+            <p style="color: #666; font-size: 12px;">Insira sua Key VIP gerada no painel de dono para acessar.</p>
+            <input type="text" id="input-key" class="key-input" placeholder="VIP-XXXXXXX">
+            <button class="login-btn" onclick="validateKey()">ENTRAR NO PAINEL</button>
+        </div>
+
+        <div id="panel-content" class="hidden" style="display: flex; flex-direction: column; height: 100%;">
+            <div class="header">
+                <div class="header-title" id="head-title">
+                    <svg id="head-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span id="head-text">AIMBOT</span>
+                </div>
+                <div class="close-x" onclick="logout()">✕</div>
+            </div>
+
+            <div class="main-content">
+                <div class="sidebar">
+                    <div class="nav-btn active" onclick="tab('aimbot', 'AIMBOT', this)">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                    </div>
+                    <div class="nav-btn" onclick="tab('raio', 'RAIO', this)">
+                        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    </div>
+                    <div class="nav-btn" onclick="tab('diversos', 'DIVERSOS', this)">
+                        <svg viewBox="0 0 24 24"><path d="M4 4h7v7H4V4zm0 9h7v7H4v-7zm9-9h7v7h-7V4zm0 9h7v7h-7v-7z"/></svg>
+                    </div>
+                    <div class="nav-btn" onclick="tab('seguranca', 'SEGURANÇA', this)">
+                        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+                    </div>
+                    <div class="nav-btn" onclick="tab('injecao', 'INJEÇÃO', this)">
+                        <svg viewBox="0 0 24 24"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                    </div>
+                </div>
+
+                <div class="panels-container">
+                    <div id="aimbot" class="panel active">
+                        <div class="item-card"><div class="text-label">Aimbot Auxiliar</div><label class="switch"><input type="checkbox" checked><span class="slider-ui"></span></label></div>
+                        <div class="item-card"><div class="text-label">Aumentar Precisão</div><label class="switch"><input type="checkbox" checked><span class="slider-ui"></span></label></div>
+                        <div class="item-card"><div class="text-label">FOV</div><div style="display:flex;align-items:center;gap:10px;flex:1;margin-left:15px;"><input type="range" min="0" max="20" value="15" oninput="document.getElementById('fov-val').innerText = this.value"><div style="color:#ff007f;font-weight:800;min-width:25px;" id="fov-val">15</div></div></div>
+                    </div>
+                    <div id="raio" class="panel side-right">
+                        <div class="item-card"><div class="text-label">Velocidade Cursor</div><label class="switch"><input type="checkbox"><span class="slider-ui"></span></label></div>
+                        <div class="item-card"><div class="text-label">Modo Raio</div><label class="switch"><input type="checkbox" checked><span class="slider-ui"></span></label></div>
+                    </div>
+                    <div id="diversos" class="panel side-right">
+                        <div class="item-card"><div class="text-label">Forçar 120 FPS</div><label class="switch"><input type="checkbox" checked><span class="slider-ui"></span></label></div>
+                        <div class="item-card"><div class="text-label">Otimização</div><label class="switch"><input type="checkbox" checked><span class="slider-ui"></span></label></div>
+                    </div>
+                    <div id="seguranca" class="panel side-right">
+                        <div class="item-card"><div class="text-label">Nível Proteção</div><div style="display:flex;align-items:center;gap:10px;flex:1;margin-left:15px;"><input type="range" min="0" max="100" value="100" oninput="document.getElementById('sec-val').innerText = this.value"><div style="color:#ff007f;font-weight:800;min-width:25px;" id="sec-val">100</div></div></div>
+                    </div>
+                    <div id="injecao" class="panel side-right">
+                        <button class="inject-btn" onclick="executarInjecao('Normal')">Injetar no Free Fire</button>
+                        <button class="inject-btn" onclick="executarInjecao('MAX')">Injetar no FF MAX</button>
+                        <div class="status-container"><div class="dot anim" id="status-dot"></div> <span id="status-text" style="color: #eee; font-size: 13px; font-weight: bold; z-index: 2;">Aguardando Comando...</span><div class="progress-bar" id="p-bar"></div></div>
+                        <div class="log-console" id="log-box"><div class="log-line">SISTEMA INICIALIZADO...</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- LÓGICA DE VALIDAÇÃO COM O GERADOR ---
+    function validateKey() {
+        const inputKey = document.getElementById('input-key').value.trim();
+        // Puxa as chaves do localStorage (mesmo banco do gerador)
+        const savedKeys = JSON.parse(localStorage.getItem('keys')) || [];
+
+        // Procura a key e verifica se não expirou nem está pausada
+        const keyData = savedKeys.find(k => k.code === inputKey);
+
+        if (!keyData) {
+            alert("❌ Key inválida ou inexistente!");
+            return;
+        }
+
+        if (keyData.isPaused) {
+            alert("⚠️ Esta Key está PAUSADA pelo administrador.");
+            return;
+        }
+
+        const timeLeft = keyData.expiresAt - Date.now();
+        if (timeLeft <= 0) {
+            alert("⏰ Esta Key já EXPIROU!");
+            return;
+        }
+
+        // Se passar em tudo:
+        alert("✅ Acesso Autorizado!");
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('panel-content').classList.remove('hidden');
+        writeLog(`USUÁRIO LOGADO COM KEY: ${inputKey}`, 'AUTH');
+    }
+
+    function logout() {
+        if(confirm("Deseja sair do painel?")) {
+            location.reload();
+        }
+    }
+
+    // --- CÓDIGO ORIGINAL DO PAINEL ---
+    const tabOrder = ['aimbot', 'raio', 'diversos', 'seguranca', 'injecao'];
+    function tab(id, name, btn) {
+        const panels = document.querySelectorAll('.panel');
+        const nextIndex = tabOrder.indexOf(id);
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('head-text').innerText = name;
+        document.getElementById('head-icon').innerHTML = btn.querySelector('svg').innerHTML;
+        panels.forEach(panel => {
+            const panelIndex = tabOrder.indexOf(panel.id);
+            panel.classList.remove('active', 'side-left', 'side-right');
+            if (panel.id === id) { panel.classList.add('active'); } 
+            else if (panelIndex < nextIndex) { panel.classList.add('side-left'); } 
+            else { panel.classList.add('side-right'); }
+        });
+    }
+
+    function writeLog(text, type = "INFO") {
+        const box = document.getElementById('log-box');
+        const time = new Date().toLocaleTimeString();
+        const line = document.createElement('div');
+        line.className = 'log-line';
+        line.innerHTML = `<span class="time">[${time}]</span><span class="tag">[${type}]</span> ${text}`;
+        box.appendChild(line);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function executarInjecao(game) {
+        const status = document.getElementById('status-text');
+        const pBar = document.getElementById('p-bar');
+        const box = document.getElementById('log-box');
+        box.innerHTML = ""; pBar.style.width = "0%"; status.innerText = `Injetando no ${game}...`;
+        const etapas = [
+            {t: "Verificando permissões...", p: 20, tag: "SYS"},
+            {t: "Buscando processo do jogo...", p: 45, tag: "LOG"},
+            {t: "Executando bypass de segurança...", p: 70, tag: "SEC"},
+            {t: "Injetando módulos ativos...", p: 90, tag: "MOD"},
+            {t: "INJEÇÃO CONCLUÍDA!", p: 100, tag: "OK"}
+        ];
+        etapas.forEach((etapa, i) => {
+            setTimeout(() => {
+                writeLog(etapa.t, etapa.tag);
+                pBar.style.width = etapa.p + "%";
+                if(i === etapas.length - 1) { status.innerText = "Tudo Pronto! Bom jogo."; }
+            }, i * 800);
+        });
+    }
+</script>
+</body>
+</html>
